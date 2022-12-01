@@ -2,13 +2,20 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import scipy.stats as stats
 from scipy.optimize import curve_fit
+
 
 def fun_T1(t, T1, c, Mo):
     return np.exp((-1)*(t+c)/T1) + Mo
 
 def fun_T2(t, T2, c, d):
     return np.exp((-1)*(2*(t+c))/T2) + d
+
+def get_chisquare(datax, datay, coeffs, fun):
+    expected = fun(datax, coeffs[0], coeffs[1], coeffs[2])
+    chi_square_test_statistic, p_value = stats.chisquare(datay, expected)
+    return chi_square_test_statistic, p_value
 
 def get_data(filename, coeff, type):
     data = pd.read_csv(filename)
@@ -45,6 +52,7 @@ def get_data(filename, coeff, type):
             print(params)
             x2 = np.linspace(x1[0]-(x1[0]/2), x1[-1]+(x1[0]/2), 10000)
             y2 = fun_T1(x2, params[0], params[1], params[2])
+            print(get_chisquare(x1, y1, params, fun_T1))
             plt.plot(x2, y2, "k")
             plt.xlabel("Time (seconds)")
             plt.ylabel("Signal Strength (Volts)")
@@ -62,6 +70,7 @@ def get_data(filename, coeff, type):
         print(params)
         x2 = np.linspace(t1[0]-(t1[0]/2), t1[-1]+(t1[0]/2), 10000)
         y2 = fun_T2(x2, params[0], params[1], params[2])
+        print(get_chisquare(x1, y1, params, fun_T2))
         plt.plot(x2, y2, "k")
         plt.xlabel("Time (seconds)")
         plt.ylabel("Signal Strength (Volts)")
@@ -73,8 +82,8 @@ def get_data(filename, coeff, type):
     return
 
 if __name__ == "__main__":
-    get_data("Data\T1_heavy-min-oil.csv", "T1", "heavy")
-    get_data("Data\T1_light-min-oil.csv", "T1", "light")
+    # get_data("Data\T1_heavy-min-oil.csv", "T1", "heavy")
+    # get_data("Data\T1_light-min-oil.csv", "T1", "light")
     get_data("Data\T2_heavy-min-oil.csv", "T2", "heavy")
     get_data("Data\T2_light-min-oil.csv", "T2", "light")
-    get_data("Data\T1_both-min-oil.csv", "T1", "both")
+    # get_data("Data\T1_both-min-oil.csv", "T1", "both")
